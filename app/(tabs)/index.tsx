@@ -1,31 +1,49 @@
-import { StyleSheet } from 'react-native';
+import {
+  Platform,
+  RefreshControl,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
+import * as React from "react";
 
-import EditScreenInfo from '../../components/EditScreenInfo';
-import { Text, View } from '../../components/Themed';
+import { Text, View } from "../../components/Themed";
+import Lottie from "lottie-react-native";
+import { createRandomUser } from "../../utils/generate-dommy-data";
+import { ThreadsContext } from "../../context/threadContext";
+import ThreadsItem from "../../components/ThreadsItem";
+
+const user = createRandomUser();
 
 export default function TabOneScreen() {
+  const animationRef = React.useRef<Lottie>(null);
+  const threads = React.useContext(ThreadsContext)
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
-    </View>
+    <SafeAreaView>
+      <ScrollView
+        contentContainerStyle={{
+          paddingHorizontal: 10,
+          paddingTop: Platform.select({ android: 30 }),
+        }}
+        refreshControl={
+          <RefreshControl
+            refreshing={false}
+            onRefresh={() => {animationRef.current?.play()}}
+            tintColor={"transparent"}
+          />
+        }
+      >
+        <Lottie
+          ref={animationRef}
+          source={require("../../lottie/threads.json")}
+          loop={false}
+          autoPlay
+          style={{ width: 100, height: 100, alignSelf: "center" }}
+          
+        />
+        {threads.map((thread) => (< ThreadsItem key={thread.id} {...thread} />))}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
-});
